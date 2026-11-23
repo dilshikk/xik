@@ -5,8 +5,10 @@
 лог: приём событий от камеры от них не зависит.
 
 Формат сообщения: фото сотрудника (если прислано камерой), под ним:
-    #Имя_Фамилия_НомерСотрудника
-    дд.мм.гггг чч:мм #checkin
+    #id1024
+    Иван Петров
+    дд.мм.гггг чч:мм
+    #checkin
 и кнопка «События за день». По нажатию бот показывает все проходы этого
 сотрудника за тот день (берёт их из таблицы hik_events).
 
@@ -61,15 +63,22 @@ def employee_no(details: dict) -> str:
 
 
 def make_hashtag(details: dict) -> str:
-    """#Иван_Петров_1024: номер не даёт склеить однофамильцев."""
-    name = str(details.get("name") or "").strip() or "Сотрудник"
-    tag = NON_WORD.sub("_", f"{name} {employee_no(details)}").strip("_")
-    return f"#{tag or 'Сотрудник'}"
+    """#id1024: хэштег только из цифр Telegram не делает кликабельным."""
+    tag = NON_WORD.sub("_", employee_no(details)).strip("_")
+    return f"#id{tag}" if tag else "#id_неизвестен"
 
 
 def build_caption(details: dict, local: datetime, direction: str | None) -> str:
+    name = str(details.get("name") or "").strip() or "Неизвестный сотрудник"
     hashtag = HASHTAGS.get(direction or "", "#событие")
-    return f"{make_hashtag(details)}\n{local.strftime('%d.%m.%Y %H:%M')} {hashtag}"
+    return "\n".join(
+        [
+            make_hashtag(details),
+            name,
+            local.strftime("%d.%m.%Y %H:%M"),
+            hashtag,
+        ]
+    )
 
 
 def day_button(details: dict, local: datetime) -> str | None:
