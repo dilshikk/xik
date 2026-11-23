@@ -36,7 +36,7 @@ from attendance import forward_payload as forward_attendance
 from config import FILES_DIR
 from dashboard import router as dashboard_router
 from db import init_db, save_event
-from telegram_notify import forward_payload as forward_telegram
+from telegram_notify import forward_payload as forward_telegram, poll_callbacks
 
 logger = logging.getLogger("hikvision")
 logging.basicConfig(level=logging.INFO)
@@ -58,7 +58,10 @@ BACKGROUND_TASKS: set[asyncio.Task] = set()
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await init_db()
+    # Приём нажатий кнопки «События за день» в Telegram
+    poller = asyncio.create_task(poll_callbacks())
     yield
+    poller.cancel()
 
 
 app = FastAPI(title="Hikvision Gateway", lifespan=lifespan)
