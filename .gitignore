@@ -5,8 +5,15 @@
 
 # Данные, которые создаёт шлюз и скрипт опроса
 images/
+tools/
+tools/hikcentral_poll.ps1
 tools/last_time.txt
 last_time.txt
+ystemctl status hik-gateway --no-pager
+ystemctl restart hik-gateway
+.htaccess
+.user.ini
+.well-known/
 
 # Python
 __pycache__/
